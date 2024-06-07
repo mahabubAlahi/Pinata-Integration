@@ -1,7 +1,9 @@
 require('dotenv').config();
-const { PINATA_API_KEY, PINATA_API_SECRET } = process.env;
+const { PINATA_API_KEY, PINATA_API_SECRET, DESIRED_GATEWAY_PREFIX } = process.env;
 const pinataSDK = require('@pinata/sdk');
 const pinata = new pinataSDK(PINATA_API_KEY, PINATA_API_SECRET);
+const IPFSGatewayTools = require("@pinata/ipfs-gateway-tools/dist/node");
+const gatewayTools = new IPFSGatewayTools();
 
 //Pin File to IPFS
 const pinFileToIPFS = async (readableStreamForFile, options) => {
@@ -274,6 +276,37 @@ const pinList = async (filters) => {
     return response;
 }
 
+const convertGatewayUrl = async (sourceUrl) => {
+
+    let response = {error: true, status: 400, msg: [], data: {}, errorMsg: []};
+
+    try{
+        const desiredGatewayPrefix = DESIRED_GATEWAY_PREFIX;
+        const convertedGatewayUrl = gatewayTools.convertToDesiredGateway(
+            sourceUrl,
+            desiredGatewayPrefix
+        );
+        response.error = false;
+        response.status =  200;
+        response.data = convertedGatewayUrl;
+        response.msg.push("Successfully convert gateway url!");
+
+    }catch (e) {
+        if (e.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            response.msg.push(e.response.data.message);
+            response.errorMsg.push(e.response.data.message);
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            response.msg.push(e.message);
+            response.errorMsg.push(e.message);
+        }
+    }
+
+    return response;
+}
+
 module.exports = {
     pinList,
     userPinnedDataTotal,
@@ -283,5 +316,6 @@ module.exports = {
     pinByHash,
     pinJSONToIPFS,
     unpin,
-    pinFileToIPFS
+    pinFileToIPFS,
+    convertGatewayUrl
 }

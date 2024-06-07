@@ -1,5 +1,7 @@
-const { pinList, pinFileToIPFS, pinJSONToIPFS } = require("./services/pinataServices");
+const { pinList, pinFileToIPFS, pinJSONToIPFS, convertGatewayUrl } = require("./services/pinataServices");
 const fs = require('fs');
+require('dotenv').config();
+const { SOURCE_GATEWAY_PREFIX } = process.env;
 
 (async () => {
 
@@ -91,8 +93,12 @@ const fs = require('fs');
     // console.log(response);
 
     //Pin JSON to IPFS
-    response = await pinJSONToIPFS(body, options);
-    console.log(response)
+    // response = await pinJSONToIPFS(body, options);
+    // console.log(response)
+
+    // const sourceUrl = SOURCE_GATEWAY_PREFIX + 'bafkreicmidm4jp3mbx3tbcrhotsqwpg4w7ypecz3ss3g72rorteybigi7a';
+    // response = await convertGatewayUrl(sourceUrl);
+    // console.log(response);
 
 })().catch((e)=>{
     console.error(`Failed: ${e}`);
